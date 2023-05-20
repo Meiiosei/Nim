@@ -1,9 +1,10 @@
-import random 
-from random import *
+from random import randint
+from random import choice
+import random
 from time import sleep 
 from Text import *
 
-v = 2 # Correspond au tant d'attente (peut être modifer)
+# Correspond au tant d'attente (peut être modifer)
 
 haut = "0"
 bas = "|"
@@ -16,6 +17,8 @@ settings = {
     "affichage": True,
     "mode_de_jeu": True,
     "tab": [7, 5, 3, 1],
+    "vitesse" : 2,
+    "difficulte" : "facile"
 }
 
 tab = [7, 5, 3, 1]
@@ -75,19 +78,15 @@ def joueur():
 		Aucun 
 	"""
 	rep1 = verification_commande("Voulez vous jouer avec un bot ?\n-->")
-
 	if rep1 in rep_favorable:
 		rep2 = verification_commande("Est ce qu'un des joueurs humain souhaite jouer ?\n(Si vous répondez non alors 2 bots s'affronteront !)-->")
-
 		if rep2 in rep_favorable:
 			settings["Joueur_2"] = random.choice(p_bot)
 			settings["nbr_bot"] = 1  # on défini le nombre de bot dans la partie à 1
 			pseudo(1)
-
 		else:
 			settings["Joueur_1"] = random.choice(p_bot)
 			settings["Joueur_2"] = random.choice(p_bot)
-
             # On fait en sorte que les deux bots n'ai pas le même pseudo
 			while settings["Joueur_1"] == settings["Joueur_2"]:
 				settings["Joueur_2"] = random.choice(p_bot)
@@ -109,10 +108,9 @@ def mode_de_jeu():
     return : mode (dicts) : mode de jeu (changé)
     """
 
-    rep = verification_commande("Voulez-vous changer le mode de jeu ? (par défaut en normal) \n-->")
-    if rep in rep_favorable:
-        settings["mode_de_jeu"] = False
-        print("Bien on change le mode de jeu")
+
+    settings["mode_de_jeu"] = False
+    print("Bien on change le mode de jeu")
     return settings["mode_de_jeu"]
 
 
@@ -126,17 +124,15 @@ def manche():
     
     Returns : Dictionnaire contenant le nombre de manches à effectué
     """
-    # On demande aux joueurs si ils veulent changer le nombre de manches !
-    rep = verification_commande("Voulez vous changez le nombre de manches jouées durant cette partie ?\n--> ")
-    if rep in rep_favorable:
-        nb = (input("Combien de manches désirez-vous donc ?\n-->"))
-        # Vérifie la validité de l'input
-        nb = verification(nb, "Combien de manches désirez-vous donc ?\n-->")
-        settings["nb_manche"] = nb
-        affiche_all(f"Bien alors il y aura {nb} manches ! \n\n")
+    nb = verification("Combien de manches désirez-vous donc ?\n-->")
+    while nb <= 0 :
+        nb = verification("Combien de manches désirez-vous donc ?\n-->")
+    settings["nb_manche"] = nb
+    affiche_all(f"Bien alors il y aura {nb} manches ! \n\n")
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------
+
 def allumettes():
     """Permet de changer le nombre d'allumettes dans la partie 
 
@@ -151,8 +147,9 @@ def allumettes():
     if rep in rep_favorable:
         for i in range(1, 5):
             var = "ligne", i
-            var = input(f"Ligne {i} ~ Combien d'allumettes souhaitez vous mettre ? \n-->")
-            var = verification(var, f"Ligne {i} ~ Combien d'allumettes souhaitez vous mettre ? \n-->")
+            var = verification(f"Ligne {i} ~ Combien d'allumettes souhaitez vous mettre ? \n-->")
+            while var <= 0 :
+                var = verification(f"Ligne {i} ~ Combien d'allumettes souhaitez vous mettre ? \n-->")
             tab[i - 1] = int(var)
         return tab
     else:
@@ -181,10 +178,6 @@ def verif_tri(tab):
             return False
     return True
 
-
-"""assert verif_tri([0, 1, 2, 3, 4, 5]) == False, "Erreur sur verif_tri : test 1"
-assert verif_tri([5, 4, 3, 2, 1, 0]) == True, "Erreur sur verif_tri : test 2"
-assert verif_tri([]) == True, "Erreur sur verif_tri : test 3"""
 # ----------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -198,7 +191,7 @@ def tri():
     Return :
     	(list) : Tableau des allumettes 
     """
-    if verif_tri() == False:
+    if verif_tri(tab) == False:
         rep = verification_commande("Vos allumettes ne sont pas dans l'ordre\nVoulez vous les rangés ? -->")
         if rep in rep_favorable:
             tab.sort(reverse=True)
@@ -214,59 +207,67 @@ def mode_affichage():
     Fonction qui permet de changer la manière dont les allumettes sont affichées 
     """
 
-    rep = input(
-        "Voulez vous changer l'affichage des allumettes ? (Par défaut avec les dessins)\n-->")
-
-    if rep in rep_favorable:
-
-        settings["affichage"] = False
-        print("Bien on change l'affichage ! ")
+    settings["affichage"] = False
+    print("Bien on change l'affichage ! ")
 
 # ----------------------------------------------------------------------------------------------------------------------------------
 
+def vitesse() :
+    """
+    Fonction qui change la durée d'attente.
+    """
+
+    rep = verification("Quelle est la nouvelle durée d'attente ? : ")
+    while rep < 0 :
+        rep = verification("Quelle est la nouvelle durée d'attente ? : ")
+    settings["vitesse"] = rep 
+    
+def difficulte ():
+    """Permet de changer la difficulté.
+
+    Returns:
+        _type_: _description_
+    """
+    if settings["difficulte"] == "facile":
+        settings["difficulte"] ="difficile"
+    elif settings["difficulte"] == "difficile":
+        settings["difficulte"] = "facile"
+    print (f"Bien le mode de jeu à été changer en mode {settings['difficulte']} ! ")
+# ----------------------------------------------------------------------------------------------------------------------------------
 
 def pseudo(nbr):
-	"""
-	Permet de définir un pseudonyme.
-	
-	Args :
-		nbr (int) : Nombre de joueur.
+    """
+    Permet de définir un pseudonyme.
 
-	Return :
-		(dicts) --> name : contient le pseudo des joueurs
-	"""
-	for i in range(nbr):
-		if i == 0:
-			player = "Joueur_1"
-		elif i == 1:
-			player = "Joueur_2"
-		rep = input(f"{player}, voulez vous changez de pseudonyme ? ( O = Oui / N = Non)\n-->")
-		if rep == "exit":
-			fonction_exit
-		elif rep == "help":
-			affiche_all(commande['aide'])
-		elif rep == "rules":
-			affiche_all(commande['rules'])
-			sleep(3)
-			rep = input(f"Joueur 1, voulez vous changez de pseudonyme ? ( O = Oui / N = Non)\n-->")
-		else:
-			if rep in rep_favorable:
-				nouveau_pseudo = input("Alors comment désirez-vous être appelé ?\n--->")
-				if nouveau_pseudo == "exit":
-					fonction_exit()
-				elif nouveau_pseudo == "help":
-					affiche_all(commande['aide'])
-				elif nouveau_pseudo == "rules":
-					affiche_all(commande['rules'])
-					sleep(3)
-					nouveau_pseudo = input("Alors comment désirez-vous être appelé ?\n--->")
-				else:
-					settings[player] = nouveau_pseudo
-					print(f"Bien vous serez donc désormais appelé {nouveau_pseudo} !")
-			else:
-				print("Bien, nous ne changerons pas votre pseudonyme !\n")
+    Args :
+        nbr (int) : Nombre de joueur.
 
-	return settings
+    Return :
+        (dicts) --> name : contient le pseudo des joueurs
+    """
+    for i in range(nbr):
+        if i == 0:
+            player = "Joueur_1"
+        elif i == 1:
+            player = "Joueur_2"
+        rep = verification_commande(f"{player}, voulez vous changez de pseudonyme ? ( O = Oui / N = Non)\n-->")		
+        if rep in rep_favorable:
+            nouveau_pseudo = input("Alors comment désirez-vous être appelé ?\n--->")
+            if nouveau_pseudo == "exit":
+                fonction_exit()
+            elif nouveau_pseudo == "help":
+                affiche_all(commande['aide'])
+            elif nouveau_pseudo == "rules":
+                affiche_all(commande['rules'])
+                sleep(3)
+                nouveau_pseudo = input("Alors comment désirez-vous être appelé ?\n--->")
+            else:
+                settings[player] = nouveau_pseudo
+                print(f"Bien vous serez donc désormais appelé {nouveau_pseudo} !")
+        else:
+            print("Bien, nous ne changerons pas votre pseudonyme !\n")
+
+        return settings
 
 # Fonctions de STRATEGIE GAGNANTE
 
@@ -279,13 +280,6 @@ def int_to_bin(nbr):
 
 	Return :
 		(str) : Valeur en binaire.
-  
-    Tests à faire :
-    
-assert int_to_bin(13) == 
-assert int_to_bin(53) == 
-assert int_to_bin(0) ==
-assert int_to_bin(1) == 
 
 	"""
 	if nbr == 0:
@@ -305,13 +299,6 @@ def bin_to_int(bit):
 
 	Return :
 		(int) : La valeur en base 10 correspondant.
-    
-    Tests à faire :
-  
-assert int_to_bin('0100101') == 
-assert int_to_bin('01011110100001') == 
-assert int_to_bin('0') ==
-assert int_to_bin('1') == 
 	"""
 	n = 0
 	tour = 0
@@ -333,7 +320,6 @@ def tab_int_to_tab_bin(tableau):
 	Return :
 		(list) : tableau de valeur en binaire (chaine de caractères).
   
-
 	"""
 	return [int_to_bin(tableau[i]) for i in range(len(tableau))]
 
@@ -483,6 +469,16 @@ def coup_parfait(tableau):
         print("Quelque chose ne vas pas ")
     return indice, nbr
 
+def minimum ():
+    pass
+
+def coup_miseret(tableau):
+    """Permet de jouer un coup parfait en mode misère
+
+    Args:
+        tableau (list): Situation des allumettes
+    """
+    pass
 
 def ordi_parfait(tableau):
     """
@@ -500,13 +496,14 @@ def ordi_parfait(tableau):
             pass
         else:
             tableau = tab_int_to_tab_bin(tableau)
-    if type_config(tableau) == False:
+    if type_config(tableau) == True or settings["difficulte"] == "facile":
+        ordi_alea()
+    if settings ["mode_de_jeu"] == False :
+        parfait["indice"] = coup_misere(tableau)[0]
+        parfait["nbr"] = coup_misere(tableau)[1]
+    else:
         parfait["indice"] = coup_parfait(tableau)[0]
         parfait["nbr"] = coup_parfait(tableau)[1]
-
-    else:
-        ordi_alea()
-    
     return parfait["indice"], parfait["nbr"]
     
 
@@ -600,7 +597,7 @@ def gagner(tab):
     return False
 
 
-def verification(reponse, question):
+def verification(question):
     """Fonction permettant de forcer l'input d'un joueur pour qu'il soit valide
 
     Args:
@@ -610,35 +607,36 @@ def verification(reponse, question):
     Returns:
         reponse (str): la réponse valide.
     """
+    reponse = input(question)
     if reponse == "exit":
         fonction_exit()
     elif reponse == "help":
         affiche_all(commande['aide'])
-        sleep(2)
+        sleep(settings["vitesse"])
         reponse = input(question)
-        reponse = verification(reponse, question)
+        reponse = verification(question)
     elif reponse == "rules":
         affiche_all(commande['rules'])
-        sleep(2)
+        sleep(settings["vitesse"])
         reponse = input(question)
-        reponse = verification(reponse, question)
+        reponse = verification(question)
     try:
         reponse = int(reponse)
     except:
-        while not reponse.isdigit():
+        while not reponse.isdigit() or reponse == "²":
             reponse = input(question)
             if reponse == "exit":
                 fonction_exit()
             elif reponse == "help":
                 affiche_all(commande['aide'])
-                sleep(2)
+                sleep(settings["vitesse"])
                 reponse = input(question)
-                reponse = verification(reponse, question)
+                reponse = verification(question)
             elif reponse == "rules":
                 affiche_all(commande['rules'])
-                sleep(2)
+                sleep(settings["vitesse"])
                 reponse = input(question)
-                reponse = verification(reponse, question)
+                reponse = verification(question)
     return int(reponse)
 
 
@@ -656,12 +654,12 @@ def verification_commande(question):
         fonction_exit()
     elif reponse == "help":
         affiche_all(commande['aide'])
-        sleep(2)
+        sleep(settings["vitesse"])
         reponse = input(question)
         reponse = verification_commande(question)
     elif reponse == "rules":
         affiche_all(commande['rules'])
-        sleep(2)
+        sleep(settings["vitesse"])
         reponse = input(question)
         reponse = verification_commande(question)
     return reponse
@@ -675,12 +673,11 @@ def fonction_exit():
     affiche_all("\n---------- LE JEU VA S'ARRETER !----------  ")
     exit()
     
-def humain(joueur, demande):
+def humain(demande):
     """Fonction d'interface avec l'utilisateur, qui lui permet d'entrer
     un nombre d'allumettes ou la ligne qu'il a choisi.
 
     Args:
-        joueur (str): Pseudo du joueur 
         demande (str): Type de input voulu (pour les allumetets ou les lignes)
 
     Returns:
@@ -688,26 +685,17 @@ def humain(joueur, demande):
     """
 
     if demande == "ligne":
-        reponse = input(f"{joueur} , sur quelle ligne souhaitez vous prélever des allumettes ?\n-->")
-        reponse = verification(reponse, "Sur quelle ligne souhaitez vous prendre des allumettes ?\n-->")
+        reponse = verification("Sur quelle ligne souhaitez vous prendre des allumettes ?\n-->")
     elif demande == 'allumette':
-        reponse = input(f"{joueur} , combien souhaitez vous en prendre ?\n-->")
-        reponse = verification(
-            reponse, "Sur quelle ligne souhaitez vous prendre des allumettes ?\n-->")
+        reponse = verification("Combien d'allumettes voulez-vous en prendre ?\n-->")
     reponse = int(reponse)
     if demande == "ligne":
         while reponse <= 0 or reponse > len(tab):
             affiche_all(error["infaisable"])
-            reponse = input(
-                f"{joueur} , sur quelle ligne souhaitez vous prélever des allumettes ?\n-->")
-            reponse = verification(
-                reponse, "Sur quelle ligne souhaitez vous prendre des allumettes ?\n-->")
+            reponse = verification("Sur quelle ligne souhaitez vous prendre des allumettes ?\n-->")
         while tab[reponse - 1] == 0:
             affiche_all(error["infaisable"])
-            reponse = input(
-                f"{joueur} , sur quelle ligne souhaitez vous prélever des allumettes ?\n-->")
-            reponse = verification(
-                reponse, "Sur quelle ligne souhaitez vous prendre des allumettes ?\n-->")
+            reponse = verification("Sur quelle ligne souhaitez vous prendre des allumettes ?\n-->")
         reponse = reponse - 1
     if demande == 'allumette':
         reponse = int(reponse)
@@ -721,56 +709,49 @@ def jeu():
     
     if settings["nbr_bot"] == 0:
 
-        affiche(settings["affichage"])
+        affiche()
 
         while not gagner(tab) == True :
-
-            ligne = humain(tour_a_tour(t), 'ligne')
+            ligne = humain('ligne')
             affiche_all(f"Vous pouvez prendre jusqu'a : {tab[ligne]} allumette(s)")
-
-            coup = humain(tour_a_tour(t), 'allumette')
-
+            coup = humain('allumette')
             while coup > tab[ligne] or coup <= 0:
-
                 affiche_all(error["infaisable"])
-                coup = humain(tour_a_tour(t), 'allumette')
+                coup = humain('allumette')
 
             joue(ligne, coup)
 
             while joue == None:
-
                 affiche_all(error["infaisable"])
-                ligne = humain(tour_a_tour(t), 'ligne')
-                colonne = humain(tour_a_tour(t), 'allumette')
+                ligne = humain('ligne')
+                colonne = humain('allumette')
                 joue(ligne, colonne)
-
-            affiche(settings["affichage"])
-
+            affiche()
             t += 1    # Compte les tours, permet de passé d'un joueur a l'autre,
                     # et de pouvoir dire combien de tour sont passés
                     
                     
     elif settings["nbr_bot"] == 1:
         
-        affiche(settings["affichage"])
+        affiche()
         while not gagner(tab) == True :
             
             if tour_a_tour(t) == settings["Joueur_1"] :
-                ligne = humain(tour_a_tour(t), 'ligne')
+                ligne = humain('ligne')
                 affiche_all(f"Vous pouvez prendre jusqu'a : {tab[ligne]} allumette(s)")
-                coup = humain(tour_a_tour(t), 'allumette')
+                coup = humain('allumette')
                 
                 while coup > tab[ligne] or coup <= 0:
 
                     affiche_all(error["infaisable"])
-                    coup = humain(tour_a_tour(t), 'allumette')
+                    coup = humain('allumette')
                     joue(ligne, coup)
                 
                 while joue == None:
 
                     affiche_all(error["infaisable"])
-                    ligne = humain(tour_a_tour(t), 'ligne')
-                    colonne = humain(tour_a_tour(t), 'allumette')
+                    ligne = humain('ligne')
+                    colonne = humain('allumette')
                     joue(ligne, colonne)
                 joue(ligne, coup)
             else:
@@ -780,29 +761,23 @@ def jeu():
                 joue(ligne, coup)
                 print(f"{tour_a_tour(t)} à pris {coup} allumettes sur ligne {ligne + 1} !")
 
-            affiche(settings["affichage"])
+            affiche()
             t = t + 1
-                
-            
-    
+
     elif settings["nbr_bot"] == 2:
 
-        affiche(settings["affichage"])
+        affiche()
 
         while not gagner(tab) == True:
             ordi_parfait(tab)
             ligne = parfait["indice"]
             coup = parfait["nbr"]
             joue(ligne, coup)
-        
-                
             print (f"{tour_a_tour(t)} à pris {coup} allumettes sur la ligne {ligne + 1} !")
-            
+            sleep(settings["vitesse"])
+            affiche()
+            t += 1
 
-            affiche(settings["affichage"])
-
-            t += 1    # Compte les tours, permet de passé d'un joueur a l'autre,
-                    # et de pouvoir dire combien de tour sont passés
 
     if settings["mode_de_jeu"] == True :
         affiche_win(tour_a_tour(t+1))
@@ -829,32 +804,47 @@ def initialisation():
               f"\n5 - Mode d'affiche : {settings['affichage']}",
               f"\n6 - Mode de jeu : {settings['mode_de_jeu']}",
               f"\n7 - Nombre d'allumettes : {settings['tab']}",
+              f"\n8 - Vitesse de jeu : {settings['vitesse']}",
+              f"\n9 - Difficulté : {settings['difficulte']}"
               "\n-------------------------------------")
-        reponse = input ("Voulez vous changer l'un de ces paramètres ?\n-->")
+        reponse = verification_commande("Voulez vous changer l'un de ces paramètres ?\n-->")
         if reponse in rep_favorable :
-            changement = (input("Veuillez alors inscrire le nombre correspondant au paramètre correspondant : "))
-            changement = verification(changement, "Veuillez alors inscrire le nombre correspondant au paramètre correspondant : ")
+            changement = verification("Veuillez alors inscrire le nombre correspondant au paramètre correspondant : ")
+            
             if changement == 1 :
                 joueur()
+                
             elif changement == 2:
                 if settings["nbr_bot"] == 2 :
                     print("Désolé, mais vous ne pouvez modifier le pseudo d'un bot !")
                 else:
                     pseudo(1)
+                    
             elif changement == 3:
                 if settings["nbr_bot"] > 0:
                     print ("Désolé, mais vous ne pouvez modifier le pseudo d'un bot !")
                 else :
                     pseudo(2)
+                    
             elif changement == 4:
                 manche()
+                
             elif changement == 5:
                 mode_affichage()
+                
             elif changement == 6:
                 mode_de_jeu()
+                
             elif changement == 7:
                 allumettes()
                 settings["tab"] = tab
+                tri()
+                
+            elif changement == 8:
+                vitesse()
+            
+            elif changement == 9:
+                difficulte()
     r = input("Voulez vous voir les règles du jeu avant de commencer ?\n-->")
 
     if r in rep_favorable:
@@ -863,8 +853,8 @@ def initialisation():
 
     affiche_all(demarrage)
 
-# PARTIE AFFICHAGE
 
+# PARTIE AFFICHAGE
 
 def score_fin(score):
     """Fonction qui regarde le gagnant de toutes les manches
@@ -890,7 +880,7 @@ def score_fin(score):
 # -----------------------------------------------------------------------------------------------
 
 
-def affiche(event):
+def affiche():
     """
     Fonction d'affichage qui permet d'afficher le nombre d'allumettes 
     restante dans le jeux.
@@ -899,20 +889,15 @@ def affiche(event):
         event (str) : type d'affichage des allumettes 
     """
 
-    if event == False:
+    if settings["affichage"] == False:
         print()
         for i in range(len(tab)):
-            # Les trucs bizzare dans le
-            print(
-                '\033[1m' + f'Il reste {tab[i]} allumette(s) dans la ligne {i+ 1 }' + '\033[0m')
-                                                                                                      # print sont là pour mettre
-                                                                                                     # en gras le texte
+            print('\033[1m' + f'Il reste {tab[i]} allumette(s) dans la ligne {i+ 1 }' + '\033[0m')
         print()
 
-    elif event == True:
+    elif settings["affichage"] == True:
         for i in range(len(tab)):
-            print ("ligne n°", i+1, " :",  end= " ")  # Beaucoup de trucs bizzares alors que c'est
-                                                             # simplement l'affichage des dessins d'allumettes
+            print ("ligne n°", i+1, " :",  end= " ")
             for x in range(tab[i]):
                 print(haut, end=' ')
             print()
@@ -921,16 +906,11 @@ def affiche(event):
                 print (bas, end=' ')
             print()
             print()
-        print("---------Partie Numérique---------")
         print()
         for i in range(len(tab)):
-            # Les trucs bizzare dans le
-            print(
-                '\033[1m' + f'Il reste {tab[i]} allumette(s) dans la ligne {i+ 1 }' + '\033[0m')
-                                                                                                      # print sont là pour mettre
-                                                                                                     # en gras le texte
+            print('\033[1m' + f'Il reste {tab[i]} allumette(s) dans la ligne {i+ 1 }' + '\033[0m')
         print()
-    return None
+    
 
 # -----------------------------------------------------------------------------------------------
 
@@ -957,7 +937,7 @@ def affiche_win(name):
     """
     print("-------------------------------------------------------\n"
               f"Félicitation {name}, vous remportez la manche!!\n"
-              "-------------------------------------------------------")
+            "-------------------------------------------------------")
 
 # PROGRAMME PRINCIPAL
 
@@ -965,25 +945,19 @@ if __name__ == "__main__":
     
     initialisation()  # paramétrage du jeu
     tab_dep = [tab[i] for i in range(len(tab))]  # Mise en place (sécurisé)
-                                               # des allumettes
+                                                 # des allumettes
 
     for i in range(settings['nb_manche']):  # Tourne en fonction du nombre de manche
-
-        affiche_all(
-            f"\n---------------------Manche n° {i + 1} ---------------------\n")
+        affiche_all(f"\n---------------------Manche n° {i + 1} ---------------------\n")
         if jeu() == settings["Joueur_1"]:                 # |
-            score["joueur1"] = score["joueur1"] + 1   # |
-                                                      # | Permet de compter les points ! (Car la fonction jeu
-                                                      # | renvoie le gagnant de chaques manches)
-        else:                                         # |
-            score["joueur2"] = score["joueur2"] + 1   # |
-
-        
+            score["joueur1"] = score["joueur1"] + 1                                
+        else:                                         
+            score["joueur2"] = score["joueur2"] + 1   
 
         # Réinitialise les paramètres de la partie.
+        sleep(settings["vitesse"])
         tab = [tab_dep[i] for i in range(len(tab_dep))]
         t = 0
 
     score_fin(score)  # Permet d'écrire le résultat du gagnant !
 
-# Fonctions d' AFFICHAGE 
